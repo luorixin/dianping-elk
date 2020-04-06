@@ -9,6 +9,7 @@ public enum EmBusinessError {
   REGISTER_DUP_FAIL(20001,"用户已存在"),
   LOGIN_FAIL(20002,"手机号或者密码错误"),
   ADMIN_SHOULD_LOGIN(30001,"管理员需要先登录"),
+  CATEGORY_NAME_DUPLICATED(40001,"品类名已存在"),
   UNKNOWN_ERROR(10002,"未知错误");
 
   private Integer errCode;
