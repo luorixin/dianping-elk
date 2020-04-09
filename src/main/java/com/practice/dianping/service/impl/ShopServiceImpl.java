@@ -194,6 +194,17 @@ public class ShopServiceImpl implements ShopService {
       .getJSONObject("bool").getJSONArray("must").getJSONObject(queryIndex)
       .getJSONObject("term").put("seller_disabled_flag", 0);
 
+    if (tags != null){
+      queryIndex++;
+      jsonRequestObj.getJSONObject("query").getJSONObject("function_score").getJSONObject("query")
+        .getJSONObject("bool").getJSONArray("must").add(new JSONObject());
+      jsonRequestObj.getJSONObject("query").getJSONObject("function_score").getJSONObject("query")
+        .getJSONObject("bool").getJSONArray("must").getJSONObject(queryIndex).put("term", new JSONObject());
+      jsonRequestObj.getJSONObject("query").getJSONObject("function_score").getJSONObject("query")
+        .getJSONObject("bool").getJSONArray("must").getJSONObject(queryIndex)
+        .getJSONObject("term").put("tags", tags);
+    }
+
     if (categoryId!=null){
       queryIndex++;
       jsonRequestObj.getJSONObject("query").getJSONObject("function_score").getJSONObject("query")
@@ -272,6 +283,12 @@ public class ShopServiceImpl implements ShopService {
       jsonRequestObj.getJSONArray("sort").getJSONObject(0).getJSONObject("_score").put("order", "asc");
     }
 
+    // aggs
+    jsonRequestObj.put("aggs", new JSONObject());
+    jsonRequestObj.getJSONObject("aggs").put("group_by_tags", new JSONObject());
+    jsonRequestObj.getJSONObject("aggs").getJSONObject("group_by_tags").put("terms", new JSONObject());
+    jsonRequestObj.getJSONObject("aggs").getJSONObject("group_by_tags").getJSONObject("terms").put("field", "tags");
+
     String reqJson = jsonRequestObj.toJSONString();
 
 
@@ -279,8 +296,9 @@ public class ShopServiceImpl implements ShopService {
     Response response = highLevelClient.getLowLevelClient().performRequest(request);
     String responseStr = EntityUtils.toString(response.getEntity());
     JSONObject jsonObject = JSONObject.parseObject(responseStr);
-    JSONArray jsonArray = jsonObject.getJSONObject("hits").getJSONArray("hits");
+
     List<ShopModel> shopModels = new ArrayList<>();
+    JSONArray jsonArray = jsonObject.getJSONObject("hits").getJSONArray("hits");
     for (int i =0;i<jsonArray.size(); i++){
       JSONObject jsonObject1 = jsonArray.getJSONObject(i);
       Integer id = new Integer(jsonObject1.get("_id").toString());
@@ -290,6 +308,17 @@ public class ShopServiceImpl implements ShopService {
       shopModels.add(shopModel);
     }
 
+    List<Map> tagsList = new ArrayList<>();
+    JSONArray tagsJsonArray = jsonObject.getJSONObject("aggregations").getJSONObject("group_by_tags").getJSONArray("buckets");
+    for (int i =0;i<tagsJsonArray.size(); i++){
+      JSONObject jsonObject1 = tagsJsonArray.getJSONObject(i);
+      Map<String, Object> tagMap = new HashMap<>();
+      tagMap.put("tags", jsonObject1.getString("key"));
+      tagMap.put("num", jsonObject1.getInteger("doc_count"));
+      tagsList.add(tagMap);
+    }
+
+    result.put("tags", tagsList);
     result.put("shop", shopModels);
     return result;
   }
