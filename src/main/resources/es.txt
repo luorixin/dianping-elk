@@ -83,10 +83,15 @@ GET /shop/_search
       "query": {
         "bool": {
           "must": [
-            {"match": {"name": {"query": "凯悦","boost": 0.1}}},
-            {"term": {"seller_disabled_flag": 0}},
-            {"term": {"category_id": 2}},
-            {"term": {"tags": "落地大窗"}}
+            {
+              "bool": {
+                "should": [
+                  {"match": {"name": {"query": "凯悦","boost": 0.1}}},
+                  {"term": {"category_id": {"value": "2", "boost": 0}}}// 重塑相关性，可以通过类目进行搜索
+                ]
+              }
+            },
+            {"term": {"seller_disabled_flag": 0}}
           ]
         }
       },
@@ -113,7 +118,11 @@ GET /shop/_search
             "field": "seller_remark_score"
           },
           "weight": 0.1
-        }
+        },
+        {
+          "filter": {"term" : {"category_id": 2}},
+          "weight": 0.2
+        }// 影响排序的重塑相关性
       ],
       "score_mode": "sum",
       "boost_mode": "sum"
@@ -152,9 +161,15 @@ GET /shop/_search
       "query": {
         "bool": {
           "must": [
-            {"match": {"name": {"query": "凯悦","boost": 0.1}}},
-            {"term": {"seller_disabled_flag": 0}},
-            {"term": {"category_id": 2}}
+            {
+              "bool": {
+                "should": [
+                  {"match": {"name": {"query": "凯悦","boost": 0.1}}},
+                  {"term": {"category_id": {"value": "2", "boost": 0.1}}}
+                ]
+              }
+            },
+            {"term": {"seller_disabled_flag": 0}}
           ]
         }
       },
