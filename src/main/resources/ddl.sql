@@ -52,3 +52,9 @@ CREATE TABLE `dianpingdb`.`shop`  (
   `icon_url` varchar(100) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
 );
+
+CREATE TABLE `dianpingdb`.`recommend` (
+ `id` int NOT NULL,
+ `recommend` varchar(1000) NOT NULL,
+ PRIMARY KEY (`id`)
+);

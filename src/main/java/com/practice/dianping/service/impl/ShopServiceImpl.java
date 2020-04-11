@@ -8,6 +8,8 @@ import com.practice.dianping.dal.ShopModelMapper;
 import com.practice.dianping.model.CategoryModel;
 import com.practice.dianping.model.SellerModel;
 import com.practice.dianping.model.ShopModel;
+import com.practice.dianping.recommend.RecommendService;
+import com.practice.dianping.recommend.RecommendSortService;
 import com.practice.dianping.service.CategoryService;
 import com.practice.dianping.service.SellerService;
 import com.practice.dianping.service.ShopService;
@@ -49,6 +51,12 @@ public class ShopServiceImpl implements ShopService {
 
   @Autowired
   private RestHighLevelClient highLevelClient;
+
+  @Autowired
+  private RecommendService recommendService;
+
+  @Autowired
+  private RecommendSortService recommendSortService;
 
   @Override
   @Transactional
@@ -100,11 +108,20 @@ public class ShopServiceImpl implements ShopService {
 
   @Override
   public List<ShopModel> recommend(BigDecimal longitude, BigDecimal latitude) {
-    List<ShopModel> shopModels = shopModelMapper.recommend(longitude, latitude);
-    shopModels.forEach(shopModel -> {
-      shopModel.setSellerModel(sellerService.get(shopModel.getSellerId()));
-      shopModel.setCategoryModel(categoryService.get(shopModel.getCategoryId()));
-    });
+    List<Integer> shopIds = recommendService.recall(463);
+    shopIds = recommendSortService.sort(shopIds, 463);
+    List<ShopModel> shopModels = shopIds.stream().map(id -> {
+      ShopModel shopModel = get(id);
+      shopModel.setIconUrl("/static/image/shopcover/xchg.jpg");
+      shopModel.setDistance(100);
+      return shopModel;
+    }).collect(Collectors.toList());
+
+//    List<ShopModel> shopModels = shopModelMapper.recommend(longitude, latitude);
+//    shopModels.forEach(shopModel -> {
+//      shopModel.setSellerModel(sellerService.get(shopModel.getSellerId()));
+//      shopModel.setCategoryModel(categoryService.get(shopModel.getCategoryId()));
+//    });
     return shopModels;
   }
 
