@@ -8,10 +8,12 @@ import org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchAu
 import org.springframework.boot.autoconfigure.elasticsearch.rest.RestClientAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication(scanBasePackages = "com.practice.dianping")
 @MapperScan("com.practice.dianping.dal")
 @EnableAspectJAutoProxy(proxyTargetClass = true)
+@EnableScheduling
 // 重要
 @EnableAutoConfiguration(exclude={ElasticsearchAutoConfiguration.class, RestClientAutoConfiguration.class})
 public class DianpingApplication {
